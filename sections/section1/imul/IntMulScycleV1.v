@@ -6,7 +6,7 @@
 `define IMUL_INT_MUL_SCYCLE_V1_V
 
 `include "vc/trace.v"
-`include "vc/regs.v"
+`include "vc/regs.v" // defining registers structurally!!
 
 module imul_IntMulScycleV1
 (
@@ -23,10 +23,49 @@ module imul_IntMulScycleV1
   //----------------------------------------------------------------------
   // Implement the two input registers below.
 
+  // logic [31:0] in0_reg;
+  // logic [31:0] in1_reg; instead of defining registers implicitly -
+
+  logic [31:0] in0_reg;
+
+  vc_ResetReg#(32,0) in0_reg_
+  (
+    .clk   (clk),
+    .reset (reset),
+    .d     (in0),
+    .q     (in0_reg)
+  );
+
+  logic [31:0] in1_reg;
+
+  vc_ResetReg#(32,0) in1_reg_
+  (
+    .clk   (clk),
+    .reset (reset),
+    .d     (in1),
+    .q     (in1_reg)
+  );
+
+  // always use nonblocking for sequential - always @( posedge clk )
+  always @( posedge clk ) begin
+      if ( reset ) begin
+        in0_reg <= 32b'0;
+        in1_reg <= 32b'0;
+      end
+      else begin
+        in0_reg <= in0;
+        in1_reg <= in1;
+      end
+  end
   //----------------------------------------------------------------------
   // Multiplication Logic (combinational logic)
   //----------------------------------------------------------------------
   // Implement the multiplication logic below.
+
+  // always use blocking for combinational - always @(*)
+  always @(*) begin
+    out = in0_reg * in1_reg;
+  end
 
   //----------------------------------------------------------------------
   // Line Tracing
